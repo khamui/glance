@@ -1,3 +1,6 @@
+import {Server} from './backend/Server'
+
 export class App {
-  message = 'Hello World!';
+  s = new Server;
+  message = 'Info: ' + this.s.run();
 }
