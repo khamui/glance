@@ -1,4 +1,14 @@
-input.number {
-    width: 80px;
-    font-size: 20px;
+.block {
+    padding: 5px;
+    width: 60px;
+}
+
+.number {
+    display: block;
+    width: 100%;
+    font-size: 14px;
+    padding:5px;
+    border: 1px solid #b8b8b8;
+    border-radius: 3px;
+    text-align: right;
 }

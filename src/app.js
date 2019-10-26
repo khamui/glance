@@ -5,6 +5,7 @@ export class App {
     this.router = router;
     config.title = 'Glance App';
     config.map([
+      { route: 'dashboard', moduleId: PLATFORM.moduleName('components/dashboard'), title:'Dashboard' },
       { route: 'number', moduleId: PLATFORM.moduleName('components/number'), title:'Number' }
     ]);
   }
