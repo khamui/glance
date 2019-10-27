@@ -1,3 +1,4 @@
+
 export class ToArrayValueConverter {
   toView(value) {
     const array = [];
