@@ -6,6 +6,7 @@ import 'handsontable/dist/handsontable.full.css';
 
 export class Xltable {
   @bindable actionTitle;
+  @bindable expensePosition;
 
   data = [
     ['', 'Week 1', 'Week 2', 'Week 3', 'Week 4'],
@@ -22,37 +23,46 @@ export class Xltable {
     this.hot = new Handsontable(this.container, {
       data: this.data,
       rowHeaders: false,
-      colHeaders: false,
+      colHeaders: this.getColHeaders(),
       licenseKey: 'non-commercial-and-evaluation'
     });
   }
 
-  getActionTitle(expensePosition) {
-    if (this.dataContains(expensePosition)) {
+  getColHeaders() {
+    let headers = [];
+    for (let elem of this.data[0]) {
+      headers.push(elem);
+    }
+    return headers;
+  }
+
+  getActionTitle() {
+    if (this.dataContains()) {
       return '- REMOVE';
     }
     return '+ ADD';
   }
 
-  dataContains(expensePosition) {
+  dataContains() {
     for (let row of this.data) {
-      if (row.includes(expensePosition) && expensePosition !== '') {
+      if (row.includes(this.expensePosition) && this.expensePosition !== '') {
         return true;
       }
     }
     return false;
   }
 
-  actionData(expensePosition) {
-    if (!expensePosition) return false;
+  actionData() {
+    if (!this.expensePosition) return false;
     const updateData = this.data;
-    const newRow = [expensePosition];
+    const newRow = [this.expensePosition];
 
-    if (!this.dataContains(expensePosition)) {
+    if (!this.dataContains(this.expensePosition)) {
       updateData.push(newRow);
+      this.expensePosition = '';
     }
     else {
-      console.log('remove row of: ' + expensePosition);
+      console.log('remove row of: ' + this.expensePosition);
     }
     this.hot.render();
   }

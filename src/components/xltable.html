@@ -3,10 +3,13 @@
   <div class="xltable__override">
     <div id="xltable"></div> 
   </div>
+  <br />
   <div>
     <span>
       <input type="text" value.bind="expensePosition">
-      <button type="button" click.delegate="actionData(expensePosition)">${getActionTitle(expensePosition) & throttle}</button>
+      <button type="button" click.delegate="actionData()">
+        ${getActionTitle(expensePosition) & throttle:500}
+      </button>
     </span>
   </div>
 </template>
