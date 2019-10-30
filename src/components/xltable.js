@@ -9,10 +9,10 @@ export class Xltable {
   @bindable expensePosition;
 
   data = [
-    ['', 'Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    ['Software', 10, 11, 12, 13],
-    ['Hardware', 20, 11, 14, 13],
-    ['Human Resources', 30, 15, 12, 13]
+    {title: 'Date', row0: 'Week 1', row1: 'Week 2', row2: 'Week 3', row3: 'Week 4'},
+    {title: 'Software', row0: 10, row1: 11, row2: 12, row3: 13},
+    {title: 'Hardware', row0: 20, row1: 11, row2: 14, row3: 13},
+    {title: 'Human Resources', row0: 30, row1: 15, row2: 12, row3: 13}
   ];
 
   container = null;
@@ -24,14 +24,19 @@ export class Xltable {
       data: this.data,
       rowHeaders: false,
       colHeaders: this.getColHeaders(),
+      minSpareRows: 1,
+      hiddenRows: {
+        rows: [0],
+        indicators: true
+      },
       licenseKey: 'non-commercial-and-evaluation'
     });
   }
 
   getColHeaders() {
     let headers = [];
-    for (let elem of this.data[0]) {
-      headers.push(elem);
+    for (let col in this.data[0]) {
+      headers.push(this.data[0][col]);
     }
     return headers;
   }
@@ -43,9 +48,16 @@ export class Xltable {
     return '+ ADD';
   }
 
+  isDuplicate(i) {
+    if (this.data[i].title === this.expensePosition) {
+      return true;
+    }
+  }
+
   dataContains() {
-    for (let row of this.data) {
-      if (row.includes(this.expensePosition) && this.expensePosition !== '') {
+    for (let i in this.data) {
+      // this.data[i]['row'+i]
+      if (this.isDuplicate(i) && this.expensePosition !== '') {
         return true;
       }
     }
@@ -55,7 +67,7 @@ export class Xltable {
   actionData() {
     if (!this.expensePosition) return false;
     const updateData = this.data;
-    const newRow = [this.expensePosition];
+    const newRow = {title: this.expensePosition};
 
     if (!this.dataContains(this.expensePosition)) {
       updateData.push(newRow);
