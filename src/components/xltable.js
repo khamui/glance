@@ -3,18 +3,14 @@
 import {bindable} from 'aurelia-framework';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
+import {Resource} from '../backend/resource.js';
 
 export class Xltable {
   @bindable actionTitle;
   @bindable expensePosition;
 
-  data = [
-    {title: 'Date', row0: 'Week 1', row1: 'Week 2', row2: 'Week 3', row3: 'Week 4'},
-    {title: 'Software', row0: 10, row1: 11, row2: 12, row3: 13},
-    {title: 'Hardware', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Human Resources', row0: 30, row1: 15, row2: 12, row3: 13}
-  ];
-
+  resource = new Resource;
+  data = this.resource.items;
   container = null;
   hot = null;
 
@@ -24,7 +20,6 @@ export class Xltable {
       data: this.data,
       rowHeaders: false,
       colHeaders: this.getColHeaders(),
-      minSpareRows: 1,
       hiddenRows: {
         rows: [0],
         indicators: true
@@ -74,7 +69,12 @@ export class Xltable {
       this.expensePosition = '';
     }
     else {
-      console.log('remove row of: ' + this.expensePosition);
+      for (let item of this.data) {
+        if (item.title === this.expensePosition) {
+          let index = this.data.indexOf(item);
+          this.data.splice(index, 1);
+        }
+      }
     }
     this.hot.render();
   }
