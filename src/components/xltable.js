@@ -26,6 +26,12 @@ export class Xltable {
       },
       licenseKey: 'non-commercial-and-evaluation'
     });
+
+    this.hot.addHook('afterSelection', (index) => this.sendSelection(index));
+  }
+
+  sendSelection(index) {
+    this.expensePosition = this.data[index].title;
   }
 
   getColHeaders() {
