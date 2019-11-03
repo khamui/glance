@@ -7,7 +7,7 @@
   <div>
     <span>
       <input type="text" value.bind="expensePosition">
-      <button type="button" click.delegate="actionData()">
+      <button type="button" click.delegate="actionData(expensePosition)">
         ${getActionTitle(expensePosition) & throttle:500}
       </button>
     </span>

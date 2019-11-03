@@ -18,20 +18,22 @@ export class Xltable {
     this.container = document.getElementById('xltable');
     this.hot = new Handsontable(this.container, {
       data: this.data,
-      rowHeaders: false,
+      rowHeaders: true,
       colHeaders: this.getColHeaders(),
+      manualRowMove: true,
       hiddenRows: {
-        rows: [0],
-        indicators: true
+        rows: [0]
       },
       licenseKey: 'non-commercial-and-evaluation'
     });
 
-    this.hot.addHook('afterSelection', (index) => this.sendSelection(index));
+    this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.sendSelection(row, col, row2, col2));
+    // this.hot.addHook('afterDeselect', () => this.sendSelection());
   }
 
-  sendSelection(index) {
-    this.expensePosition = this.data[index].title;
+  sendSelection(row, col, row2, col2) {
+    if (!row || row !== row2 || col > 0 || col2 > 0) return this.expensePosition = '';
+    this.expensePosition = this.data[row].title;
   }
 
   getColHeaders() {
@@ -65,20 +67,21 @@ export class Xltable {
     return false;
   }
 
-  actionData() {
-    if (!this.expensePosition) return false;
+  actionData(expPosition) {
+    if (!expPosition) return false;
     const updateData = this.data;
-    const newRow = {title: this.expensePosition};
+    const newRow = {title: expPosition};
 
-    if (!this.dataContains(this.expensePosition)) {
+    if (!this.dataContains(expPosition)) {
       updateData.push(newRow);
       this.expensePosition = '';
     }
     else {
       for (let item of this.data) {
-        if (item.title === this.expensePosition) {
+        if (item.title === expPosition) {
           let index = this.data.indexOf(item);
           this.data.splice(index, 1);
+          this.expensePosition = '';
         }
       }
     }
