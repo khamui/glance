@@ -13,6 +13,10 @@ export class Xltable {
   data = this.resource.items;
   container = null;
   hot = null;
+  numformat = {
+    pattern: '0.00 €',
+    culture: 'fr-FR'
+  }
 
   attached() {
     this.container = document.getElementById('xltable');
@@ -24,6 +28,13 @@ export class Xltable {
       hiddenRows: {
         rows: [0]
       },
+      columns: [
+        {data: 'title', type: 'text'},
+        {data: 'row0', type: 'numeric', numericFormat: this.numformat},
+        {data: 'row1', type: 'numeric', numericFormat: this.numformat},
+        {data: 'row2', type: 'numeric', numericFormat: this.numformat},
+        {data: 'row3', type: 'numeric', numericFormat: this.numformat}
+      ],
       licenseKey: 'non-commercial-and-evaluation'
     });
 
