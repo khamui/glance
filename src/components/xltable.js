@@ -22,7 +22,7 @@ export class Xltable {
     this.container = document.getElementById('xltable');
     this.hot = new Handsontable(this.container, {
       data: this.data,
-      rowHeaders: true,
+      rowHeaders: '☰',
       colHeaders: this.getColHeaders(),
       manualRowMove: true,
       hiddenRows: {
