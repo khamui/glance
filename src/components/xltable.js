@@ -14,8 +14,7 @@ export class Xltable {
   container = null;
   hot = null;
   numformat = {
-    pattern: '0.00 €',
-    culture: 'fr-FR'
+    pattern: '0.00',
   }
 
   attached() {
@@ -35,16 +34,30 @@ export class Xltable {
         {data: 'row2', type: 'numeric', numericFormat: this.numformat},
         {data: 'row3', type: 'numeric', numericFormat: this.numformat}
       ],
+      cells: function(row, col, prop) {
+        let cellProperties = {};
+        cellProperties.invalidCellClassName = 'hilight__error-anim';
+        return cellProperties;
+      },
       licenseKey: 'non-commercial-and-evaluation'
     });
 
     this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.sendSelection(row, col, row2, col2));
+    this.hot.addHook('afterChange', (changes, event) => this.checkNumberType(changes, event));
     // this.hot.addHook('afterDeselect', () => this.sendSelection());
   }
 
   sendSelection(row, col, row2, col2) {
     if (!row || row !== row2 || col > 0 || col2 > 0) return this.expensePosition = '';
     this.expensePosition = this.data[row].title;
+  }
+
+  checkNumberType(changes, event) {
+    for (let change of changes) {
+      if (typeof change[3] === 'number') return;
+      this.data[change[0]][change[1]] = change[2];
+      this.hot.render();
+    }
   }
 
   getColHeaders() {
