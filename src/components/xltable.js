@@ -38,8 +38,8 @@ export class Xltable {
       licenseKey: 'non-commercial-and-evaluation'
     });
 
-    this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.sendSelection(row, col, row2, col2));
-    this.hot.addHook('afterChange', (changes, event) => this.checkNumberType(changes, event));
+    this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.selectionCallback(row, col, row2, col2));
+    this.hot.addHook('afterChange', (changes, event) => this.changeCallback(changes, event));
   }
 
   valueFieldTypeCheck() {
@@ -48,14 +48,19 @@ export class Xltable {
     return cellProperties;
   }
 
-  sendSelection(row, col, row2, col2) {
-    if (!row || row !== row2 || col > 0 || col2 > 0) return this.expensePosition = '';
+  isCategory(row, col, row2, col2) {
+    return !row || row !== row2 || col > 0 || col2 > 0;
+  }
+
+  selectionCallback(row, col, row2, col2) {
+    if (this.isCategory(row, col, row2, col2)) return this.expensePosition = '';
     this.expensePosition = this.data[row].title;
   }
 
-  checkNumberType(changes) {
+  changeCallback(changes) {
     for (let change of changes) {
       if (typeof change[3] === 'number') return;
+      if (change[1] === 'title') return;
       // changes = [row, prop, oldVal, newVal] --> afterChange Hook
       this.hot.setDataAtRowProp(change[0], change[1], change[2]);
     }
@@ -89,24 +94,22 @@ export class Xltable {
     return false;
   }
 
-  actionData(expPosition) {
-    if (!expPosition) return false;
-    const updateData = this.data;
-    const newRow = {title: expPosition};
+  actionData() {
+    if (!this.expensePosition) return false;
+    const newRowsCount = (isNaN(this.expensePosition) ? 1 : Number(this.expensePosition));
 
-    if (!this.dataContains(expPosition)) {
-      updateData.push(newRow);
+    if (!this.dataContains(this.expensePosition)) {
+      this.hot.alter('insert_row', this.data.length, newRowsCount);
       this.expensePosition = '';
     }
     else {
       for (let item of this.data) {
-        if (item.title === expPosition) {
+        if (item.title === this.expensePosition) {
           let index = this.data.indexOf(item);
-          this.data.splice(index, 1);
+          this.hot.alter('remove_row', index, 1);
           this.expensePosition = '';
         }
       }
     }
-    this.hot.render();
   }
 }
