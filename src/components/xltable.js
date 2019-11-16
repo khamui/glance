@@ -38,8 +38,8 @@ export class Xltable {
       licenseKey: 'non-commercial-and-evaluation'
     });
 
-    this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.sendSelection(row, col, row2, col2));
-    this.hot.addHook('afterChange', (changes, event) => this.checkNumberType(changes, event));
+    this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.selectionCallback(row, col, row2, col2));
+    this.hot.addHook('afterChange', (changes, event) => this.changeCallback(changes, event));
   }
 
   valueFieldTypeCheck() {
@@ -48,14 +48,19 @@ export class Xltable {
     return cellProperties;
   }
 
-  sendSelection(row, col, row2, col2) {
-    if (!row || row !== row2 || col > 0 || col2 > 0) return this.expensePosition = '';
+  isCategory(row, col, row2, col2) {
+    return !row || row !== row2 || col > 0 || col2 > 0;
+  }
+
+  selectionCallback(row, col, row2, col2) {
+    if (this.isCategory(row, col, row2, col2)) return this.expensePosition = '';
     this.expensePosition = this.data[row].title;
   }
 
-  checkNumberType(changes) {
+  changeCallback(changes) {
     for (let change of changes) {
       if (typeof change[3] === 'number') return;
+      if (change[1] === 'title') return;
       // changes = [row, prop, oldVal, newVal] --> afterChange Hook
       this.hot.setDataAtRowProp(change[0], change[1], change[2]);
     }
