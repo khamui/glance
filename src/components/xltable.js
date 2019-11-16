@@ -96,18 +96,18 @@ export class Xltable {
 
   actionData(expPosition) {
     if (!expPosition) return false;
-    const updateData = this.data;
-    const newRow = {title: expPosition};
+    let updateData = this.data;
+    const newRowsCount = (isNaN(expPosition) ? 1 : Number(expPosition));
 
     if (!this.dataContains(expPosition)) {
-      updateData.push(newRow);
+      this.hot.alter('insert_row', updateData.length, newRowsCount);
       this.expensePosition = '';
     }
     else {
       for (let item of this.data) {
         if (item.title === expPosition) {
-          let index = this.data.indexOf(item);
-          this.data.splice(index, 1);
+          let index = updateData.indexOf(item);
+          this.hot.alter('remove_row', index, 1);
           this.expensePosition = '';
         }
       }
