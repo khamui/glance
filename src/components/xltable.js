@@ -94,24 +94,22 @@ export class Xltable {
     return false;
   }
 
-  actionData(expPosition) {
-    if (!expPosition) return false;
-    let updateData = this.data;
-    const newRowsCount = (isNaN(expPosition) ? 1 : Number(expPosition));
+  actionData() {
+    if (!this.expensePosition) return false;
+    const newRowsCount = (isNaN(this.expensePosition) ? 1 : Number(this.expensePosition));
 
-    if (!this.dataContains(expPosition)) {
-      this.hot.alter('insert_row', updateData.length, newRowsCount);
+    if (!this.dataContains(this.expensePosition)) {
+      this.hot.alter('insert_row', this.data.length, newRowsCount);
       this.expensePosition = '';
     }
     else {
       for (let item of this.data) {
-        if (item.title === expPosition) {
-          let index = updateData.indexOf(item);
+        if (item.title === this.expensePosition) {
+          let index = this.data.indexOf(item);
           this.hot.alter('remove_row', index, 1);
           this.expensePosition = '';
         }
       }
     }
-    this.hot.render();
   }
 }
