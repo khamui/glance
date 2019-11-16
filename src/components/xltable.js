@@ -14,7 +14,7 @@ export class Xltable {
   container = null;
   hot = null;
   numformat = {
-    pattern: '0.00',
+    pattern: '0.00'
   }
 
   attached() {
@@ -34,17 +34,18 @@ export class Xltable {
         {data: 'row2', type: 'numeric', numericFormat: this.numformat},
         {data: 'row3', type: 'numeric', numericFormat: this.numformat}
       ],
-      cells: function(row, col, prop) {
-        let cellProperties = {};
-        cellProperties.invalidCellClassName = 'hilight__error-anim';
-        return cellProperties;
-      },
+      cells: this.valueFieldTypeCheck,
       licenseKey: 'non-commercial-and-evaluation'
     });
 
     this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.sendSelection(row, col, row2, col2));
     this.hot.addHook('afterChange', (changes, event) => this.checkNumberType(changes, event));
-    // this.hot.addHook('afterDeselect', () => this.sendSelection());
+  }
+
+  valueFieldTypeCheck() {
+    let cellProperties = {};
+    cellProperties.invalidCellClassName = 'hilight__error-anim';
+    return cellProperties;
   }
 
   sendSelection(row, col, row2, col2) {
@@ -52,11 +53,11 @@ export class Xltable {
     this.expensePosition = this.data[row].title;
   }
 
-  checkNumberType(changes, event) {
+  checkNumberType(changes) {
     for (let change of changes) {
       if (typeof change[3] === 'number') return;
-      this.data[change[0]][change[1]] = change[2];
-      this.hot.render();
+      // changes = [row, prop, oldVal, newVal] --> afterChange Hook
+      this.hot.setDataAtRowProp(change[0], change[1], change[2]);
     }
   }
 
@@ -76,14 +77,11 @@ export class Xltable {
   }
 
   isDuplicate(i) {
-    if (this.data[i].title === this.expensePosition) {
-      return true;
-    }
+    return (this.data[i].title === this.expensePosition) ? true : false;
   }
 
   dataContains() {
     for (let i in this.data) {
-      // this.data[i]['row'+i]
       if (this.isDuplicate(i) && this.expensePosition !== '') {
         return true;
       }
