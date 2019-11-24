@@ -18,17 +18,20 @@ export class Xltable {
   }
 
   attached() {
+    // console.log(JSON.parse(JSON.stringify(this.data)));
     this.container = document.getElementById('xltable');
     this.hot = new Handsontable(this.container, {
       data: this.data,
       rowHeaders: '☰',
       colHeaders: this.getColHeaders(),
       manualRowMove: true,
+      persistentState: true,
       hiddenRows: {
         rows: [0]
       },
       columns: [
-        {data: 'title', type: 'text'},
+        {data: 'title', type: 'text', readOnly: true},
+        {data: 'details', type: 'text', readOnly: true},
         {data: 'row0', type: 'numeric', numericFormat: this.numformat},
         {data: 'row1', type: 'numeric', numericFormat: this.numformat},
         {data: 'row2', type: 'numeric', numericFormat: this.numformat},
