@@ -1,0 +1,12 @@
+<template>
+  <aside class="menu">
+      <p class="menu-label">
+        Navigation
+      </p>
+      <ul class="menu-list">
+        <li class="menu-item ${navItem.isActive ? 'is-active' : ''}" repeat.for="navItem of router.navigation">
+          <a href="${navItem.href}">${navItem.title}</a>
+        </li>
+      </ul>
+    </aside>
+</template>

@@ -1,8 +1,0 @@
-<template>
-  <require from="./number.html"></require>
-  <require from="../converters/to-array"></require>
-  <span><input type="number" value.bind="numamount"></span>
-  <div repeat.for="num of numamount | toArray">
-    <number />
-  </div>
-</template>

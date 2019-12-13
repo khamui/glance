@@ -1,41 +1,50 @@
 /* eslint brace-style: ["error", "stroustrup"] */
 
-import {bindable} from 'aurelia-framework';
+import { inject } from 'aurelia-framework';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import {Resource} from '../backend/resource.js';
+import { EventAggregator } from 'aurelia-event-aggregator';
 
+@inject(EventAggregator)
 export class Xltable {
-  @bindable actionTitle;
-  @bindable expensePosition;
-
-  resource = new Resource;
-  data = this.resource.items;
-  container = null;
-  hot = null;
-  numformat = {
-    pattern: '0.00'
+  constructor(eventAggregator) {
+    this.ea = eventAggregator;
+    this.data = null;
+    this.container = null;
+    this.hot = null;
+    this.numformat = {
+      pattern: '0.00'
+    };
+    this.eventSubscription = this.ea.subscribe('load-data', payload => (this.configTable(payload)));
   }
 
   attached() {
-    // console.log(JSON.parse(JSON.stringify(this.data)));
+  }
+
+  detached() {
+    this.eventSubscription.dispose();
+  }
+
+  configTable(data) {
+    console.log(data);
+    this.data = data;
     this.container = document.getElementById('xltable');
     this.hot = new Handsontable(this.container, {
-      data: this.data,
+      data: this.data['exp_hot'],
       rowHeaders: '☰',
       colHeaders: this.getColHeaders(),
       manualRowMove: true,
       persistentState: true,
-      hiddenRows: {
-        rows: [0]
-      },
+      // hiddenRows: {
+      //   rows: [0]
+      // },
       columns: [
-        {data: 'title', type: 'text', readOnly: true},
-        {data: 'details', type: 'text', readOnly: true},
-        {data: 'row0', type: 'numeric', numericFormat: this.numformat},
-        {data: 'row1', type: 'numeric', numericFormat: this.numformat},
-        {data: 'row2', type: 'numeric', numericFormat: this.numformat},
-        {data: 'row3', type: 'numeric', numericFormat: this.numformat}
+        {data: 'exp_category', type: 'text', readOnly: true},
+        {data: 'exp_tax', type: 'text', readOnly: true},
+        {data: 'col0', type: 'numeric', numericFormat: this.numformat},
+        {data: 'col1', type: 'numeric', numericFormat: this.numformat},
+        {data: 'col2', type: 'numeric', numericFormat: this.numformat},
+        {data: 'col3', type: 'numeric', numericFormat: this.numformat}
       ],
       cells: this.valueFieldTypeCheck,
       licenseKey: 'non-commercial-and-evaluation'
@@ -57,19 +66,24 @@ export class Xltable {
 
   selectionCallback(row, col, row2, col2) {
     if (this.isCategory(row, col, row2, col2)) return this.expensePosition = '';
-    this.expensePosition = this.data[row].title;
+    this.expensePosition = this.data[row]['exp_category'];
   }
 
   changeCallback(changes) {
     for (let change of changes) {
-      if (typeof change[3] === 'number') return;
-      if (change[1] === 'title') return;
+      if (change[1] === 'exp_category') return;
+      if (typeof change[3] === 'number') {
+        this.resource.updateValues(this.hot.getData());
+        // console.log(this.hot.getData());
+        return;
+      }
       // changes = [row, prop, oldVal, newVal] --> afterChange Hook
       this.hot.setDataAtRowProp(change[0], change[1], change[2]);
     }
   }
 
   getColHeaders() {
+    // Generating headers with weeks and months
     let headers = [];
     for (let col in this.data[0]) {
       headers.push(this.data[0][col]);
@@ -85,7 +99,7 @@ export class Xltable {
   }
 
   isDuplicate(i) {
-    return (this.data[i].title === this.expensePosition) ? true : false;
+    return (this.data[i]['exp_category'] === this.expensePosition) ? true : false;
   }
 
   dataContains() {
@@ -107,7 +121,7 @@ export class Xltable {
     }
     else {
       for (let item of this.data) {
-        if (item.title === this.expensePosition) {
+        if (item['exp_category'] === this.expensePosition) {
           let index = this.data.indexOf(item);
           this.hot.alter('remove_row', index, 1);
           this.expensePosition = '';
