@@ -2,13 +2,17 @@
   border-color: #2b353d;
 }
 
-.xltable__override table {
-  background-color: #20272d;
+.xltable__override {
+  margin-bottom: 1.5rem;
+  background-color: white;
+  color: #363636;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 .xltable__override td, th {
-  background-color: #2b353d;
-  color: #839aac;
+  background-color: white;
+  color: #363636;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
   font-size: .9rem;
   font-weight: 100;

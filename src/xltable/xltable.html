@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="id">
     <require from="./xltable.css"></require>
     <span>
       <input class="input is-primary" type="text" value.bind="expensePosition">
@@ -7,11 +7,8 @@
         ${getActionTitle(expensePosition) & throttle:500}
       </button>
     </span>
-    <br />
-    <br />
-    <br />
     <div class="xltable__override">
-      <div id="xltable"></div> 
+      <div id.bind="id" ref="xref"></div>
     </div>
   </div>
 </template>

@@ -21,7 +21,8 @@ const dbconnect = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'glanceDB'
+  database: 'glanceDB',
+  multipleStatements: true
 });
 
 // START DB CONNECTION
@@ -30,40 +31,29 @@ const dbconnect = mysql.createConnection({
     if (error) throw error;
     console.log('server started. connection successful.');
   });
-  const expObject = await resourceBuilder(4001, 'exp');
-  await sendTo('/expenses', expObject);
+
+  await app.get('/expenses', (req, resp) => {
+    resourceBuilder(4001, 'exp')
+      .then((result) => resp.send(result))
+  });
+
+  // await app.get('/expenses/:gla_id', (req, resp) => {
+  //   resourceBuilder(4001, 'exp')
+  //     .then((result) => resp.send(result))
+  // });
+
+  await app.post('/expenses', (req, resp) => {
+    updateValueObjects(req.body);
+  });
+
   console.log('Endpoints created.');
-  getFrom('/test');
-  dbconnect.end();
+  // dbconnect.end();
 })();
 
 
-function queryTo(endpoint, sql) {
-  app.get(endpoint, (req, resp) => {
-    dbconnect.query(sql, (error, result) => {
-      if (error) throw error;
-      resp.send(result);
-    });
-  });
-}
-
-function sendTo(endpoint, data) {
-  app.get(endpoint, (req, resp) => {
-    resp.status(200);
-    resp.send(data);
-  });
-}
-
-function getFrom(endpoint) {
-  app.post(endpoint, (req, resp) => {
-    console.log(req.body);
-    resp.end();
-  });
-}
-
-// GETTERS
-function getDataWith(sql) {
-  return new Promise ((res,rej) => {
+// GET
+function queryDatabase(sql) {
+  return new Promise((res,rej) => {
     dbconnect.query(sql, (error, result, fields) => {
       (error) ? rej(error) : res(result);
     });
@@ -72,15 +62,34 @@ function getDataWith(sql) {
 
 async function getCategoryObjects(glaId) {
   const sql = 'SELECT * FROM tbl_expense_cat WHERE gla_id=' + glaId;
-  return await getDataWith(sql);
+  return await queryDatabase(sql);
 }
 
 async function getValueObjects(expId) {
   const sql = 'SELECT * FROM tbl_expense_val WHERE exp_id=' + expId;
-  return await getDataWith(sql);
+  return await queryDatabase(sql);
 }
 
-// SETTERS
+// UPDATE
+async function updateValueObjects(data) {
+  let sql = '';
+
+  for (let category of data['exp_hot']) {
+    orderCount = 1;
+    sql = sql.concat(`DELETE FROM tbl_expense_val WHERE exp_id=${category['exp_id']};\n`);
+    for (let col in category) {
+      // console.log(col);
+      if (col.substring(0, 3) === 'col') {
+        sql = sql.concat('INSERT INTO tbl_expense_val (exp_id,exp_order,exp_value)\n');
+        sql = sql.concat(`VALUES (${category['exp_id']},${orderCount},${category[col]});\n`);
+        orderCount++;
+      }
+    }
+  }
+  // console.log(sql);
+  return await queryDatabase(sql);
+}
+
 // BUILDER
 
 async function hotBuilder(glaId, prefix, catObjects) {
