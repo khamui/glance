@@ -7,26 +7,27 @@ export class Glance {
   constructor(api, eventAggregator) {
     this.api = new api;
     this.ea = eventAggregator;
-    this.resource = { resourcetype: 'table', expData: null, revData: null };
+    this.resource = { resType: null, data: null };
     this.eventSubscription = this.ea.subscribe('update-data', (payload) => {
-      return this.updateExpenses(payload);
+      return this.updateXltable(payload);
     });
   }
 
   created() {
-    this.getExpenses();
+    this.readXltable();
   }
 
-  getExpenses() {
-    this.api.get('expenses')
+  readXltable() {
+    this.api.read('expenses/4001')
       .then((result) => {
-        this.resource.expData = result;
+        this.resource.data = result;
+        this.resource.resType = this.resource.data['res_type'];
         this.ea.publish('load-data', this.resource);
       });
   }
 
-  updateExpenses(data) {
-    this.api.update('expenses', data)
+  updateXltable(data) {
+    this.api.create('expenses', data)
       .then((result) => {
         console.log(result);
       });

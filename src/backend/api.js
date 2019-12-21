@@ -19,20 +19,19 @@ export class Api {
     });
   }
 
-  get(resourcetype) {
-    return this.http.fetch('/' + resourcetype)
+  read(resource) {
+    return this.http.fetch('/' + resource)
       .then(response => {
         return response.json();
       })
       .then(data => {
         // LOGGER: successful get
-        data['type'] = resourcetype;
         return data;
       })
       .catch(() => { throw new Error('network error'); });
   }
 
-  update(resourcetype, content) {
+  create(resourcetype, content) {
     return this.http.fetch('/' + resourcetype, {
       method: 'post',
       body: json(content)

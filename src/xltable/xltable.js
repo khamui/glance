@@ -17,7 +17,7 @@ export class Xltable {
     this.numformat = {
       pattern: '0.00'
     };
-    this.eventSubscription = this.ea.subscribe('load-data', payload => (this.configTable(payload)));
+    this.eventSubscription = this.ea.subscribe('load-data', resource => (this.configTable(resource)));
   }
 
   attached() {
@@ -27,16 +27,15 @@ export class Xltable {
     this.eventSubscription.dispose();
   }
 
-  configTable(data) {
-    this.pfx = data.expData.type.substring(0, 3);
-    this.data = data.expData;
+  configTable(resource) {
+    this.pfx = resource.resType;
+    this.data = resource.data;
     this.hot = new Handsontable(this.xref, {
       data: this.data[this.pfx + '_hot'],
       id: this.id,
       rowHeaders: '☰',
       colHeaders: this.getColHeaders(),
       manualRowMove: true,
-      persistentState: true,
       // hiddenRows: {
       //   rows: [0]
       // },

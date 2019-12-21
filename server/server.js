@@ -32,15 +32,16 @@ const dbconnect = mysql.createConnection({
     console.log('server started. connection successful.');
   });
 
-  await app.get('/expenses', (req, resp) => {
-    resourceBuilder(4001, 'exp')
-      .then((result) => resp.send(result))
-  });
-
-  // await app.get('/expenses/:gla_id', (req, resp) => {
+  // await app.get('/expenses', (req, resp) => {
   //   resourceBuilder(4001, 'exp')
   //     .then((result) => resp.send(result))
   // });
+
+  await app.get('/expenses/:gla_id', (req, resp) => {
+    resourceBuilder(req.params['gla_id'], 'exp')
+      .then((result) => resp.send(result))
+      .catch(() => resp.send('Resource with ID does not exist.'));
+  });
 
   await app.post('/expenses', (req, resp) => {
     updateValueObjects(req.body);
@@ -73,16 +74,18 @@ async function getValueObjects(expId) {
 // UPDATE
 async function updateValueObjects(data) {
   let sql = '';
+  let expValId = 100000;
 
   for (let category of data['exp_hot']) {
-    orderCount = 1;
+    let orderCount = 1;
     sql = sql.concat(`DELETE FROM tbl_expense_val WHERE exp_id=${category['exp_id']};\n`);
     for (let col in category) {
       // console.log(col);
       if (col.substring(0, 3) === 'col') {
-        sql = sql.concat('INSERT INTO tbl_expense_val (exp_id,exp_order,exp_value)\n');
-        sql = sql.concat(`VALUES (${category['exp_id']},${orderCount},${category[col]});\n`);
+        sql = sql.concat('INSERT INTO tbl_expense_val (exp_value_id,exp_id,exp_order,exp_value)\n');
+        sql = sql.concat(`VALUES (${expValId},${category['exp_id']},${orderCount},${category[col]});\n`);
         orderCount++;
+        expValId++;
       }
     }
   }
@@ -118,6 +121,7 @@ async function resourceBuilder(glaId, prefix) {
 
   // console.log(object);
   object['gla_id'] = await categoryObjects[0]['gla_id'];
+  object['res_type'] = prefix;
   // console.log(object);
   object[prefix + '_hot'] = await hotBuilder(glaId, prefix, categoryObjects);
   // console.log(object);
