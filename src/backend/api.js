@@ -5,7 +5,7 @@ import { HttpClient, json } from 'aurelia-fetch-client';
 export class Api {
   constructor(http) {
     this.http = new http;
-    const baseUrl = 'http://localhost:1337';
+    const baseUrl = 'http://localhost:1337/api';
     this.http.configure(config => {
       config
         .useStandardConfiguration()
@@ -41,7 +41,7 @@ export class Api {
       })
       .then(data => {
         // LOGGER: successful sent and saved
-        console.log(data + ' sent!');
+        console.log(data.status + ' successfully saved.');
         return data;
       })
       // LOGGER: error saved

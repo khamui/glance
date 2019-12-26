@@ -1,3 +1,7 @@
+//DONE: reduce complexity on server side, no resourcebuilder, instead using data rightaway?
+//TODO: define all needed endpoints
+//TODO: make use of efficient request methods: GET, POST, PUT, PATCH?, DELETE etc.
+
 /* eslint brace-style: ["error", "stroustrup"] */
 const express = require('express');
 const bodyParser = require("body-parser");
@@ -32,28 +36,41 @@ const dbconnect = mysql.createConnection({
     console.log('server started. connection successful.');
   });
 
-  // await app.get('/expenses', (req, resp) => {
-  //   resourceBuilder(4001, 'exp')
-  //     .then((result) => resp.send(result))
-  // });
-
-  await app.get('/expenses/:gla_id', (req, resp) => {
-    resourceBuilder(req.params['gla_id'], 'exp')
+// CREATE ENDPOINTS
+  await app.get('/api/:type/:gla_id', (req, resp) => {
+    queryCategoriesByType(req.params['type'], req.params['gla_id'])
       .then((result) => resp.send(result))
       .catch(() => resp.send('Resource with ID does not exist.'));
   });
 
-  await app.post('/expenses', (req, resp) => {
-    updateValueObjects(req.body);
+  await app.get('/api/values/:cat_id', (req, resp) => {
+    queryValues(req.params['cat_id'])
+      .then((result) => resp.send(result))
+      .catch(() => resp.send('Resource with ID does not exist.'));
+  });
+
+  await app.get('/api/:type/values/:cat_id', (req, resp) => {
+    queryValuesByType(req.params['type'], req.params['cat_id'])
+      .then((result) => resp.send(result))
+      .catch(() => resp.send('Resource with ID does not exist.'));
+  });
+
+  await app.post('/api/expenses', (req, resp) => {
+    updateValueObjects(req.body)
+      .then((result) => resp.send(result));
+  });
+
+  await app.post('/api/revenues', (req, resp) => {
+    updateValueObjects(req.body)
+      .then((result) => resp.send(result));
   });
 
   console.log('Endpoints created.');
   // dbconnect.end();
 })();
 
-
-// GET
-function queryDatabase(sql) {
+// DB QUERIES
+function getFromDatabaseBy(sql) {
   return new Promise((res,rej) => {
     dbconnect.query(sql, (error, result, fields) => {
       (error) ? rej(error) : res(result);
@@ -61,71 +78,43 @@ function queryDatabase(sql) {
   });
 }
 
-async function getCategoryObjects(glaId) {
-  const sql = 'SELECT * FROM tbl_expense_cat WHERE gla_id=' + glaId;
-  return await queryDatabase(sql);
+async function queryCategoriesByType(type, glaId) {
+  const sql =
+  `SELECT * FROM tbl_categories
+  WHERE tbl_categories.type='${type}'
+  AND tbl_categories.gla_id=${glaId} `;
+  return await getFromDatabaseBy(sql);
 }
 
-async function getValueObjects(expId) {
-  const sql = 'SELECT * FROM tbl_expense_val WHERE exp_id=' + expId;
-  return await queryDatabase(sql);
+async function queryValues(catId) {
+  const sql = 'SELECT * FROM tbl_values WHERE cat_id=' + catId;
+  return await getFromDatabaseBy(sql);
+}
+
+async function queryValuesByType(type, catId) {
+  const sql =
+  `SELECT * FROM tbl_categories,tbl_values
+  WHERE tbl_categories.type='${type}'
+  AND tbl_categories.cat_id=tbl_values.cat_id
+  AND tbl_values.cat_id=${catId} `;
+  return await getFromDatabaseBy(sql);
 }
 
 // UPDATE
 async function updateValueObjects(data) {
   let sql = '';
-  let expValId = 100000;
 
-  for (let category of data['exp_hot']) {
-    let orderCount = 1;
-    sql = sql.concat(`DELETE FROM tbl_expense_val WHERE exp_id=${category['exp_id']};\n`);
+  for (let category of data.data) {
+    sql = sql.concat(`DELETE FROM tbl_values WHERE cat_id=${category['cat_id']};\n`);
     for (let col in category) {
       // console.log(col);
       if (col.substring(0, 3) === 'col') {
-        sql = sql.concat('INSERT INTO tbl_expense_val (exp_value_id,exp_id,exp_order,exp_value)\n');
-        sql = sql.concat(`VALUES (${expValId},${category['exp_id']},${orderCount},${category[col]});\n`);
-        orderCount++;
-        expValId++;
+        sql = sql.concat('INSERT INTO tbl_values (cat_id,value)\n');
+        sql = sql.concat(`VALUES (${category['cat_id']},${category[col]});\n`);
       }
     }
   }
-  // console.log(sql);
-  return await queryDatabase(sql);
-}
-
-// BUILDER
-
-async function hotBuilder(glaId, prefix, catObjects) {
-  let object = [];
-  let objectIndex = 0;
-
-  for (let catObject of catObjects) {
-    object.push({exp_id: catObject[prefix + '_id'], exp_category: catObject[prefix + '_category'], exp_tax: catObject[prefix + '_tax']});
-    let valueObjects = await getValueObjects(catObject[prefix + '_id']);
-    let colIndex = 0;
-    for (let valueObject of valueObjects) {
-      let colObject = {};
-      colObject['col' + colIndex] = valueObject[prefix + '_value'];
-      Object.assign(object[objectIndex], colObject);
-      colIndex++;
-    }
-    objectIndex++;
-  }
-  if (!object) return error;
-  return await object;
-}
-
-async function resourceBuilder(glaId, prefix) {
-  let categoryObjects = await getCategoryObjects(glaId);
-  let object = {};
-
-  // console.log(object);
-  object['gla_id'] = await categoryObjects[0]['gla_id'];
-  object['res_type'] = prefix;
-  // console.log(object);
-  object[prefix + '_hot'] = await hotBuilder(glaId, prefix, categoryObjects);
-  // console.log(object);
-  return await object;
+  return await getFromDatabaseBy(sql);
 }
 
 // LISTEN
