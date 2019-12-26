@@ -1,13 +1,24 @@
+import { inject, Factory } from 'aurelia-framework';
+import { Api } from './api';
+
+@inject(Api)
 export class Resource {
-  items = [
-    {title: 'Expense Positions', row0: 'Week 1', row1: 'Week 2', row2: 'Week 3', row3: 'Week 4'},
-    {title: 'Software', row0: 10, row1: 11, row2: 12, row3: 13},
-    {title: 'Hardware', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Bueromaterial', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Reisekosten', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Personal', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Gebaeudemiete', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Energiekosten', row0: 20, row1: 11, row2: 14, row3: 13},
-    {title: 'Human Resources', row0: 30, row1: 15, row2: 12, row3: 13}
-  ];
+  constructor(api) {
+    this.api = api;
+    // this.items = [
+    //   {exp_category: 'Expense', exp_tax: 'Taxation', col0: 'M1 Week 1', col1: 'M1 Week 2', col2: 'M1 Week 3', col3: 'M1 Week 4'},
+    //   {exp_category: 'Software', exp_tax: '19', col0: 10, col1: 11, col2: 12, col3: 13},
+    //   {exp_category: 'Hardware', exp_tax: '19', col0: 20, col1: 11, col2: 14, col3: 13},
+    //   {exp_category: 'Bueromaterial', exp_tax: '19', col0: 20, col1: 11, col2: 14, col3: 13},
+    //   {exp_category: 'Reisekosten', exp_tax: '19', col0: 20, col1: 11, col2: 14, col3: 13},
+    //   {exp_category: 'Personal', exp_tax: '19', col0: 20, col1: 11, col2: 14, col3: 13},
+    //   {exp_category: 'Gebaeudemiete', exp_tax: '19', col0: 20, col1: 11, col2: 14, col3: 13},
+    //   {exp_category: 'Energiekosten', exp_tax: '19', col0: 20, col1: 11, col2: 14, col3: 13},
+    //   {exp_category: 'Human Resources', exp_tax: '19', col0: 30, col1: 15, col2: 12, col3: 13}
+    // ];
+  }
+
+  getResource() {
+    return this.api.data;
+  }
 }

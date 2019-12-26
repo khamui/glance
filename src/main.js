@@ -7,7 +7,9 @@ import {PLATFORM} from 'aurelia-pal';
 export function configure(aurelia) {
   aurelia.use
     .standardConfiguration()
-    .feature(PLATFORM.moduleName('resources/index'));
+    .feature(PLATFORM.moduleName('resources/index'))
+    .feature(PLATFORM.moduleName('bulma/css/bulma.css'))
+    .feature(PLATFORM.moduleName('bulma-helpers/css/bulma-helpers.min.css'));
 
   aurelia.use.developmentLogging(environment.debug ? 'debug' : 'warn');
 
@@ -15,5 +17,5 @@ export function configure(aurelia) {
     aurelia.use.plugin(PLATFORM.moduleName('aurelia-testing'));
   }
 
-  aurelia.start().then(() => aurelia.setRoot(PLATFORM.moduleName('app')));
+  aurelia.start().then(() => aurelia.setRoot(PLATFORM.moduleName('dashboard/dashboard')));
 }
