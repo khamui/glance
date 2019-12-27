@@ -4,5 +4,12 @@
     "ecmaFeatures": {
       "legacyDecorators": true
     }
+  },
+  "rules": {
+    "brace-style": ["error", "stroustrup"],
+    "dot-notation": ["warn", { 
+      "allowPattern": "^[a-z]+(_[a-z]+)+$",
+      "allowKeywords": false
+      }]
   }
 }

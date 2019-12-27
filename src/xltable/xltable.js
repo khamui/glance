@@ -1,48 +1,40 @@
-/* eslint brace-style: ["error", "stroustrup"] */
-
-import { bindable, inject } from 'aurelia-framework';
+import { bindable, inject, Factory } from 'aurelia-framework';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
-import { EventAggregator } from 'aurelia-event-aggregator';
+import { GlanceService } from '../services/glance-service';
 
-@inject(EventAggregator)
+@inject(Factory.of(GlanceService), Element)
 export class Xltable {
-  @bindable id;
-  constructor(eventAggregator) {
-    this.ea = eventAggregator;
-    this.pfx = '';
+  @bindable tableId;
+  constructor(GlanceServiceClass, element) {
+    this.gs = new GlanceServiceClass;
+    this.el = element;
     this.hot = null;
     this.data = {};
-    this.container = null;
-    this.numformat = {
-      pattern: '0.00'
-    };
-    this.eventSubscription = this.ea.subscribe('load-data', payload => (this.configTable(payload)));
+    this.numformat = { pattern: '0.00' };
   }
 
   attached() {
+    this.gs.readResource(this.tableId).then((resource) => {
+      this.resource = resource;
+      this.configTable();
+    });
   }
 
-  detached() {
-    this.eventSubscription.dispose();
-  }
-
-  configTable(data) {
-    this.pfx = data.expData.type.substring(0, 3);
-    this.data = data.expData;
-    this.hot = new Handsontable(this.xref, {
-      data: this.data[this.pfx + '_hot'],
+  configTable() {
+    this.data = this.resource.data;
+    this.hot = new Handsontable(this.el, {
+      data: this.data,
       id: this.id,
       rowHeaders: '☰',
       colHeaders: this.getColHeaders(),
       manualRowMove: true,
-      persistentState: true,
       // hiddenRows: {
       //   rows: [0]
       // },
       columns: [
-        {data: this.pfx + '_category', type: 'text', readOnly: true},
-        {data: this.pfx + '_tax', type: 'text', readOnly: true},
+        {data: 'name', type: 'text', readOnly: true},
+        {data: 'tax', type: 'text', readOnly: true},
         {data: 'col0', type: 'numeric', numericFormat: this.numformat},
         {data: 'col1', type: 'numeric', numericFormat: this.numformat},
         {data: 'col2', type: 'numeric', numericFormat: this.numformat},
@@ -67,14 +59,14 @@ export class Xltable {
 
   selectionCallback(row, col, row2, col2) {
     if (this.isNotCategory(row, col, row2, col2)) return this.expensePosition = '';
-    this.expensePosition = this.data[this.pfx + '_hot'][row][this.pfx + '_category'];
+    this.expensePosition = this.data[row]['name'];
   }
 
   changeCallback(changes) {
     for (let change of changes) {
-      if (change[1] === this.pfx + '_category') return;
+      if (change[1] === 'name') return;
       if (typeof change[3] === 'number') {
-        this.ea.publish('update-data', this.data);
+        this.gs.updateValues(this.resource);
         return;
       }
       // changes = [row, prop, oldVal, newVal] --> afterChange Hook
@@ -84,11 +76,7 @@ export class Xltable {
 
   getColHeaders() {
     // Generating headers with weeks and months
-    let headers = [];
-    for (let col in this.data[this.pfx + '_hot'][0]) {
-      headers.push(this.data[this.pfx + '_hot'][0][col]);
-    }
-    return headers;
+    return ['Title', 'Tax', 'Jan // Week 1', 'Jan // Week 2', 'Jan // Week 3', 'Jan // Week 4'];
   }
 
   getActionTitle() {
@@ -99,11 +87,11 @@ export class Xltable {
   }
 
   isDuplicate(i) {
-    return (this.data[this.pfx + '_hot'][i][this.pfx + '_category'] === this.expensePosition) ? true : false;
+    return (this.data[i]['name'] === this.expensePosition) ? true : false;
   }
 
   dataContains() {
-    for (let i in this.data[this.pfx + '_hot']) {
+    for (let i in this.data) {
       if (this.isDuplicate(i) && this.expensePosition !== '') {
         return true;
       }
@@ -116,13 +104,13 @@ export class Xltable {
     const newRowsCount = (isNaN(this.expensePosition) ? 1 : Number(this.expensePosition));
 
     if (!this.dataContains(this.expensePosition)) {
-      this.hot.alter('insert_row', this.data[this.pfx + '_hot'].length, newRowsCount);
+      this.hot.alter('insert_row', this.data.length, newRowsCount);
       this.expensePosition = '';
     }
     else {
-      for (let item of this.data[this.pfx + '_hot']) {
-        if (item[this.pfx + '_category'] === this.expensePosition) {
-          let index = this.data[this.pfx + '_hot'].indexOf(item);
+      for (let item of this.data) {
+        if (item['name'] === this.expensePosition) {
+          let index = this.data.indexOf(item);
           this.hot.alter('remove_row', index, 1);
           this.expensePosition = '';
         }
