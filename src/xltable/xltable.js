@@ -101,10 +101,17 @@ export class Xltable {
 
   actionData() {
     if (!this.expensePosition) return false;
-    const newRowsCount = (isNaN(this.expensePosition) ? 1 : Number(this.expensePosition));
+    // const newRowsCount = (isNaN(this.expensePosition) ? 1 : Number(this.expensePosition));
 
     if (!this.dataContains(this.expensePosition)) {
-      this.hot.alter('insert_row', this.data.length, newRowsCount);
+      const newItem = { cat_id: null, gla_id: 4001, type: this.resource.resType, name: this.expensePosition, tax: 19 };
+
+      this.hot.setDataAtRowProp([
+        [this.data.length, 'name', newItem['name']],
+        [this.data.length, 'tax', newItem['tax']]
+      ]);
+      this.gs.createCategory(newItem);
+      console.log(newItem);
       this.expensePosition = '';
     }
     else {
@@ -112,6 +119,7 @@ export class Xltable {
         if (item['name'] === this.expensePosition) {
           let index = this.data.indexOf(item);
           this.hot.alter('remove_row', index, 1);
+          this.gs.deleteCategory(item, this.resource.resType);
           this.expensePosition = '';
         }
       }
