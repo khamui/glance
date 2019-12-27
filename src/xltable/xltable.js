@@ -1,5 +1,3 @@
-/* eslint brace-style: ["error", "stroustrup"] */
-
 import { bindable, inject, Factory } from 'aurelia-framework';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
@@ -8,8 +6,8 @@ import { GlanceService } from '../services/glance-service';
 @inject(Factory.of(GlanceService), Element)
 export class Xltable {
   @bindable tableId;
-  constructor(glanceService, element) {
-    this.gs = new glanceService;
+  constructor(GlanceServiceClass, element) {
+    this.gs = new GlanceServiceClass;
     this.el = element;
     this.hot = null;
     this.data = {};

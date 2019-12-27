@@ -1,12 +1,10 @@
-/* eslint brace-style: ["error", "stroustrup"] */
-
 import { inject, Factory } from 'aurelia-dependency-injection';
 import { Api } from '../backend/api';
 
 @inject(Factory.of(Api))
 export class GlanceService {
-  constructor(api) {
-    this.api = new api;
+  constructor(ApiClass) {
+    this.api = new ApiClass;
     this.resource = {
       resType: null,
       glaId: null,
@@ -38,30 +36,29 @@ export class GlanceService {
       });
   }
 
-  //TODO: reduce complexity
+  createCatObject(cat) {
+    return {
+      'cat_id': cat['cat_id'],
+      'name': cat.name,
+      'tax': cat.tax
+    };
+  }
+
   async buildResource() {
     const hot = [];
     try {
       const categories = await this.readCategories();
       for (let category of categories) {
         const values = await this.readValues(category['cat_id']);
-        const catObject = {
-          'cat_id': category['cat_id'],
-          'name': category.name,
-          'tax': category.tax
-        };
-        let counter = 0;
-        for (let value of values) {
-          catObject['col' + counter] = value.value;
-          counter++;
-        }
+        const catObject = this.createCatObject(category);
+        values.forEach((value, index) => catObject['col' + index] = value.value);
         hot.push(catObject);
       }
+      return hot;
     }
     catch {
       throw new Error('Resource Builder failed.');
     }
-    return hot;
   }
 
   async readResource(type) {

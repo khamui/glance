@@ -29,6 +29,8 @@ const dbconnect = mysql.createConnection({
   multipleStatements: true
 });
 
+const baseurl = '/api';
+
 // START DB CONNECTION
 (async () => {
   await dbconnect.connect((error) => {
@@ -37,30 +39,30 @@ const dbconnect = mysql.createConnection({
   });
 
 // CREATE ENDPOINTS
-  await app.get('/api/:type/:gla_id', (req, resp) => {
+  await app.get(baseurl + '/:type/:gla_id', (req, resp) => {
     queryCategoriesByType(req.params['type'], req.params['gla_id'])
       .then((result) => resp.send(result))
       .catch(() => resp.send('Resource with ID does not exist.'));
   });
 
-  await app.get('/api/values/:cat_id', (req, resp) => {
+  await app.get(baseurl + '/values/:cat_id', (req, resp) => {
     queryValues(req.params['cat_id'])
       .then((result) => resp.send(result))
       .catch(() => resp.send('Resource with ID does not exist.'));
   });
 
-  await app.get('/api/:type/values/:cat_id', (req, resp) => {
+  await app.get(baseurl + '/:type/values/:cat_id', (req, resp) => {
     queryValuesByType(req.params['type'], req.params['cat_id'])
       .then((result) => resp.send(result))
       .catch(() => resp.send('Resource with ID does not exist.'));
   });
 
-  await app.post('/api/expenses', (req, resp) => {
+  await app.post(baseurl + '/expenses', (req, resp) => {
     updateValueObjects(req.body)
       .then((result) => resp.send(result));
   });
 
-  await app.post('/api/revenues', (req, resp) => {
+  await app.post(baseurl + '/revenues', (req, resp) => {
     updateValueObjects(req.body)
       .then((result) => resp.send(result));
   });
