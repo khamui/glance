@@ -1,9 +1,9 @@
 <template>
-  <span>
-    <input class="input is-primary" type="text" value.bind="expensePosition">
-    <button class="button is-primary" type="button" click.delegate="actionData()">
+  <div class="has-margin-left-50 has-margin-30">
+    <input class="input is-primary has-width-200 has-height-10" type="text" value.bind="expensePosition">
+    <button class="button ${toRemove ? 'is-danger' : 'is-primary'}" type="button" click.delegate="actionData()">
       ${getActionTitle(expensePosition) & throttle:500}
     </button>
-  </span>
+  </div>
   <div class="xltable"></div>
 </template>

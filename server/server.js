@@ -4,7 +4,7 @@
 
 /* eslint brace-style: ["error", "stroustrup"] */
 const express = require('express');
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const app = express();
 
