@@ -12,6 +12,7 @@ export class Xltable {
     this.hot = null;
     this.data = {};
     this.numformat = { pattern: '0.00' };
+    this.toRemove = false;
   }
 
   attached() {
@@ -26,6 +27,8 @@ export class Xltable {
     this.hot = new Handsontable(this.el, {
       data: this.data,
       id: this.id,
+      width: '100%',
+      colWidths: [220, 50, 140, 140, 140, 140],
       rowHeaders: '☰',
       colHeaders: this.getColHeaders(),
       manualRowMove: true,
@@ -81,8 +84,10 @@ export class Xltable {
 
   getActionTitle() {
     if (this.dataContains()) {
+      this.toRemove = true;
       return '- REMOVE';
     }
+    this.toRemove = false;
     return '+ ADD';
   }
 
