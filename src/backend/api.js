@@ -37,11 +37,15 @@ export class Api {
       body: json(content)
     })
       .then(response => {
-        return response;
+        return response.json();
       })
       .then(data => {
         // LOGGER: successful sent and saved
-        console.log(data.status + ' successfully saved.');
+        if (data.insertId) {
+          console.log(data.insertId + ' successfully saved.')
+          return data.insertId;
+        }
+        console.log(data.length + ' items successfully saved.');
         return data;
       })
       // LOGGER: error saved

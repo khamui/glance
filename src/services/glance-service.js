@@ -32,15 +32,14 @@ export class GlanceService {
   updateValues(data) {
     this.api.create(data.resType, data)
       .then((result) => {
-        console.log(result);
+        // LOGGER return
       });
   }
 
   createCategory(data) {
-    console.log(data['type'] + '/new');
-    this.api.create(data['type'] + '/new', data)
+    return this.api.create(data['type'] + '/new', data)
       .then((result) => {
-        console.log(result);
+        return result;
       });
   }
 

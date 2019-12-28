@@ -115,8 +115,10 @@ export class Xltable {
         [this.data.length, 'name', newItem['name']],
         [this.data.length, 'tax', newItem['tax']]
       ]);
-      this.gs.createCategory(newItem);
-      console.log(newItem);
+      this.gs.createCategory(newItem).then((newId) => {
+        const last = this.data.length-1;
+        this.data[last]['cat_id'] = newId;
+      });
       this.expensePosition = '';
     }
     else {
