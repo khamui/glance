@@ -36,6 +36,21 @@ export class GlanceService {
       });
   }
 
+  createCategory(data) {
+    console.log(data['type'] + '/new');
+    this.api.create(data['type'] + '/new', data)
+      .then((result) => {
+        console.log(result);
+      });
+  }
+
+  deleteCategory(data, resType) {
+    this.api.delete(resType + '/categories/' + data['cat_id'], data)
+      .then((result) => {
+        console.log(result);
+      });
+  }
+
   createCatObject(cat) {
     return {
       'cat_id': cat['cat_id'],

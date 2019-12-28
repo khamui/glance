@@ -3,8 +3,8 @@ import { HttpClient, json } from 'aurelia-fetch-client';
 
 @inject(Factory.of(HttpClient))
 export class Api {
-  constructor(http) {
-    this.http = new http;
+  constructor(Http) {
+    this.http = new Http;
     const baseUrl = 'http://localhost:1337/api';
     this.http.configure(config => {
       config
@@ -42,6 +42,24 @@ export class Api {
       .then(data => {
         // LOGGER: successful sent and saved
         console.log(data.status + ' successfully saved.');
+        return data;
+      })
+      // LOGGER: error saved
+      .catch(() => { throw new Error('network error'); });
+  }
+
+  delete(resourcetype, content) {
+    console.log(resourcetype);
+    return this.http.fetch('/' + resourcetype, {
+      method: 'delete',
+      body: json(content)
+    })
+      .then(response => {
+        return response;
+      })
+      .then(data => {
+        // LOGGER: successful sent and saved
+        console.log(data.status + ' successfully deleted.');
         return data;
       })
       // LOGGER: error saved

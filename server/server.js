@@ -57,17 +57,22 @@ const baseurl = '/api';
       .catch(() => resp.send('Resource with ID does not exist.'));
   });
 
-  await app.post(baseurl + '/expenses', (req, resp) => {
+  await app.post(baseurl + '/:type', (req, resp) => {
     updateValueObjects(req.body)
       .then((result) => resp.send(result));
   });
 
-  await app.post(baseurl + '/revenues', (req, resp) => {
-    updateValueObjects(req.body)
+  await app.post(baseurl + '/:type/new', (req, resp) => {
+    createSingleCategory(req.params['type'], req.body)
       .then((result) => resp.send(result));
   });
 
-  console.log('Endpoints created.');
+  await app.delete(baseurl + '/:type/categories/:cat_id', (req, resp) => {
+    deleteSingleCategory(req.body)
+      .then((result) => resp.send(result));
+  });
+
+  await console.log('Endpoints created.');
   // dbconnect.end();
 })();
 
@@ -81,7 +86,7 @@ function getFromDatabaseBy(sql) {
 }
 
 async function queryCategoriesByType(type, glaId) {
-  const sql =
+  let sql =
   `SELECT * FROM tbl_categories
   WHERE tbl_categories.type='${type}'
   AND tbl_categories.gla_id=${glaId} `;
@@ -89,12 +94,12 @@ async function queryCategoriesByType(type, glaId) {
 }
 
 async function queryValues(catId) {
-  const sql = 'SELECT * FROM tbl_values WHERE cat_id=' + catId;
+  let sql = 'SELECT * FROM tbl_values WHERE cat_id=' + catId;
   return await getFromDatabaseBy(sql);
 }
 
 async function queryValuesByType(type, catId) {
-  const sql =
+  let sql =
   `SELECT * FROM tbl_categories,tbl_values
   WHERE tbl_categories.type='${type}'
   AND tbl_categories.cat_id=tbl_values.cat_id
@@ -116,6 +121,20 @@ async function updateValueObjects(data) {
       }
     }
   }
+  return await getFromDatabaseBy(sql);
+}
+
+async function createSingleCategory(type, item) {
+  let sql = '';
+  sql = sql.concat('INSERT INTO tbl_categories (gla_id,type,name,tax)\n');
+  sql = sql.concat(`VALUES (${item['gla_id']},'${type}','${item['name']}',${item['tax']});\n`);
+  return await getFromDatabaseBy(sql);
+}
+
+async function deleteSingleCategory(item) {
+  let sql =
+  `DELETE FROM tbl_categories WHERE cat_id=${item['cat_id']};
+   DELETE FROM tbl_values WHERE cat_id=${item['cat_id']};`;
   return await getFromDatabaseBy(sql);
 }
 
