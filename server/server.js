@@ -110,14 +110,16 @@ async function queryValuesByType(type, catId) {
 // UPDATE
 async function updateValueObjects(data) {
   let sql = '';
+  let valId = 10001;
 
+  sql = sql.concat('DELETE FROM tbl_values;\n');
   for (let category of data.data) {
-    sql = sql.concat(`DELETE FROM tbl_values WHERE cat_id=${category['cat_id']};\n`);
     for (let col in category) {
       // console.log(col);
       if (col.substring(0, 3) === 'col') {
-        sql = sql.concat('INSERT INTO tbl_values (cat_id,value)\n');
-        sql = sql.concat(`VALUES (${category['cat_id']},${category[col]});\n`);
+        sql = sql.concat('INSERT INTO tbl_values (val_id,cat_id,value)\n');
+        sql = sql.concat(`VALUES (${valId},${category['cat_id']},${category[col]});\n`);
+        valId++;
       }
     }
   }
