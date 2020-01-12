@@ -43,6 +43,13 @@ export class GlanceService {
       });
   }
 
+  updateCategories(data) {
+    return this.api.create(data['type'] + '/categories', data)
+      .then((result) => {
+        console.log('categories updated.');
+      });
+  }
+
   deleteCategory(data, resType) {
     this.api.delete(resType + '/categories/' + data['cat_id'], data)
       .then((result) => {
@@ -52,6 +59,7 @@ export class GlanceService {
 
   createCatObject(cat) {
     return {
+      'order': cat['order'],
       'cat_id': cat['cat_id'],
       'name': cat.name,
       'tax': cat.tax
@@ -62,6 +70,7 @@ export class GlanceService {
     const hot = [];
     try {
       const categories = await this.readCategories();
+      // console.log(categories);
       for (let category of categories) {
         const values = await this.readValues(category['cat_id']);
         const catObject = this.createCatObject(category);

@@ -48,6 +48,7 @@ export class Xltable {
     });
     this.hot.addHook('afterSelectionEnd', (row, col, row2, col2) => this.selectionCallback(row, col, row2, col2));
     this.hot.addHook('afterChange', (changes, event) => this.changeCallback(changes, event));
+    this.hot.addHook('afterRowMove', (rows, target) => this.rowMoveCallback(rows, target));
   }
 
   valueFieldTypeCheck() {
@@ -60,12 +61,52 @@ export class Xltable {
     return row !== row2 || col > 0 || col2 > 0;
   }
 
+  // moveElement(array, element, offset) {
+  //   if (offset > -1 && offset < array.length) {
+  //     let removedElement = array.splice(element, 1)[0];
+  //     array.splice(offset, 0, removedElement);
+  //   }
+  //   return array;
+  // }
+
+  swapOrder(src, dst) {
+    const tmp = dst.order;
+    dst.order = src.order;
+    src.order = tmp;
+  }
+
+  // TODO: algorithm for reordering of order number!
+  rowMoveCallback(rows, target) {
+    if (rows.length > 1 || rows.length === 0) return;
+    // let row = rows[0];
+    // const removed = this.data.splice(target, 0, 'BLABLUB');
+    // // this.data.splice(target, 0, ...removed);
+    // console.log(removed);
+    // console.log(row);
+    // console.log(target);
+
+    console.log(this.data);
+    console.log(this.hot.getData());
+    
+    // this.gs.updateCategories(this.resource);
+
+    // OLD STUFF
+
+    // this.data[row].order = target;
+    // this.data[target].order = row;
+
+    // this.data.forEach((item, index) => {
+    //   console.log(item,index);
+    // });
+  }
+
   selectionCallback(row, col, row2, col2) {
     if (this.isNotCategory(row, col, row2, col2)) return this.expensePosition = '';
     this.expensePosition = this.data[row]['name'];
   }
 
   changeCallback(changes) {
+    if (!changes) return;
     for (let change of changes) {
       if (change[1] === 'name') return;
       if (typeof change[3] === 'number') {

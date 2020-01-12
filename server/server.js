@@ -67,6 +67,11 @@ const baseurl = '/api';
       .then((result) => resp.send(result));
   });
 
+  await app.post(baseurl + '/:type/categories', (req, resp) => {
+    updateCategoryObjects(req.body)
+      .then((result) => resp.send(result));
+  });
+
   await app.delete(baseurl + '/:type/categories/:cat_id', (req, resp) => {
     deleteSingleCategory(req.body)
       .then((result) => resp.send(result));
@@ -89,7 +94,7 @@ async function queryCategoriesByType(type, glaId) {
   let sql =
   `SELECT * FROM tbl_categories
   WHERE tbl_categories.type='${type}'
-  AND tbl_categories.gla_id=${glaId} `;
+  AND tbl_categories.gla_id=${glaId}`;
   return await getFromDatabaseBy(sql);
 }
 
@@ -130,6 +135,22 @@ async function createSingleCategory(type, item) {
   let sql = '';
   sql = sql.concat('INSERT INTO tbl_categories (gla_id,type,name,tax)\n');
   sql = sql.concat(`VALUES (${item['gla_id']},'${type}','${item['name']}',${item['tax']});\n`);
+  return await getFromDatabaseBy(sql);
+}
+
+// TODO: ORDERING DOES NOT MATCH WITH ORDER CHANGES OF ROWS IN FRONTEND!!!
+async function updateCategoryObjects(data) {
+  let sql = '';
+  let glaId = data['glaId'];
+  let type = data['resType'];
+
+  sql = sql.concat('DELETE FROM tbl_categories;\n');
+
+  for (let category of data.data) {
+    sql = sql.concat('INSERT INTO `tbl_categories` (`cat_id`,`gla_id`,`type`,`name`,`tax`)\n');
+    sql = sql.concat(`VALUES (${category['cat_id']},${glaId},'${type}','${category['name']}',${category['tax']});\n`);
+  }
+  console.log(sql);
   return await getFromDatabaseBy(sql);
 }
 

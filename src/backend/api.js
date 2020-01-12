@@ -32,6 +32,7 @@ export class Api {
   }
 
   create(resourcetype, content) {
+    console.log(json(content));
     return this.http.fetch('/' + resourcetype, {
       method: 'post',
       body: json(content)
@@ -53,7 +54,6 @@ export class Api {
   }
 
   delete(resourcetype, content) {
-    console.log(resourcetype);
     return this.http.fetch('/' + resourcetype, {
       method: 'delete',
       body: json(content)
