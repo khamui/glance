@@ -8,6 +8,7 @@ export class Dashboard {
 
   configureRouter(config, router) {
     this.router = router;
+    config.title = 'Glance App';
     config.map(routes);
   }
 
