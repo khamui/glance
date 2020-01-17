@@ -8,18 +8,11 @@ export default [
     settings: { iconClass: 'fa-home'}
   },
   {
-    name: 'glance',
-    route: ['glance'],
-    moduleId: PLATFORM.moduleName('glance/glance'),
+    name: 'sheets',
+    route: ['sheets'],
+    moduleId: PLATFORM.moduleName('editor/sheets'),
     nav: true,
-    title: 'Glances',
-    settings: { iconClass: ''}
-  },
-  {
-    name: 'xltable',
-    route: ['xltable'],
-    moduleId: PLATFORM.moduleName('xltable/xltable'),
-    title: 'xltable',
+    title: 'Editor',
     settings: { iconClass: ''}
   }
 ];
