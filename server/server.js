@@ -38,7 +38,28 @@ const baseurl = '/api';
     console.log('server started. connection successful.');
   });
 
-// CREATE ENDPOINTS
+
+// NEW ENDPOINTS
+// entire data of glance by glance id
+  await app.get(baseurl + '/sheets/:gla_id', (req, resp) => {
+    getSheetsByGlance(req.params['gla_id'])
+      .then((result) => resp.send(result))
+      .catch(() => resp.send('Resource with ID does not exist.'));
+  });
+
+  await app.get(baseurl + '/sheets/:gla_id/:type/:sheet_id', (req, resp) => {
+    getSheetValues(req.params['sheet_id'])
+      .then((result) => resp.send(result))
+      .catch(() => resp.send('Resource with ID does not exist.'));
+  });
+
+  await app.put(baseurl + '/sheets/:gla_id/:type', (req, resp) => {
+    putSheetValues(req.body.rows)
+      .then((result) => resp.send(result))
+      .catch(() => resp.send('Resource with ID does not exist.'));
+  });
+
+  // CREATE ENDPOINTS
   await app.get(baseurl + '/:type/:gla_id', (req, resp) => {
     queryCategoriesByType(req.params['type'], req.params['gla_id'])
       .then((result) => resp.send(result))
@@ -90,6 +111,33 @@ function getFromDatabaseBy(sql) {
   });
 }
 
+// NEW DB QUERIES
+async function getSheetsByGlance(glaId) {
+  let sql =
+  `SELECT * FROM tbl_sheet
+  WHERE tbl_sheet.gla_id='${glaId}'`;
+  return await getFromDatabaseBy(sql);
+}
+
+async function getSheetValues(sheetId) {
+  let sql =
+  `SELECT * FROM tbl_hot
+  WHERE tbl_hot.sheet_id='${sheetId}'`;
+  return await getFromDatabaseBy(sql);
+}
+
+async function putSheetValues(rows) {
+  let sql = '';
+  for (let row of rows) {
+    const catData = JSON.stringify(row.slice(2, -1));
+    sql = sql.concat(
+      `UPDATE tbl_hot
+      SET sheet_id=${row[1]}, cat_data='${catData}'
+      WHERE cat_id=${row[0]};\n\n`);
+  }
+  return await getFromDatabaseBy(sql);
+}
+
 async function queryCategoriesByType(type, glaId) {
   let sql =
   `SELECT * FROM tbl_categories
@@ -138,7 +186,6 @@ async function createSingleCategory(type, item) {
   return await getFromDatabaseBy(sql);
 }
 
-// TODO: ORDERING DOES NOT MATCH WITH ORDER CHANGES OF ROWS IN FRONTEND!!!
 async function updateCategoryObjects(data) {
   let sql = '';
   let glaId = data['glaId'];

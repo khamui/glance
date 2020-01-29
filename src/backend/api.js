@@ -19,8 +19,8 @@ export class Api {
     });
   }
 
-  read(resource) {
-    return this.http.fetch('/' + resource)
+  read(endpoint) {
+    return this.http.fetch('/' + endpoint)
       .then(response => {
         return response.json();
       })
@@ -28,6 +28,28 @@ export class Api {
         // LOGGER: successful get
         return data;
       })
+      .catch(() => { throw new Error('network error'); });
+  }
+
+  update(endpoint, content) {
+    console.log(content);
+    return this.http.fetch('/' + endpoint, {
+      method: 'put',
+      body: json(content)
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        // LOGGER: successful sent and saved
+        if (data.insertId) {
+          console.log(data.insertId + ' successfully updated.')
+          return data.insertId;
+        }
+        console.log(data.length + ' items successfully updated.');
+        return data;
+      })
+      // LOGGER: error saved
       .catch(() => { throw new Error('network error'); });
   }
 

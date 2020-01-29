@@ -4,10 +4,9 @@
   <h1 class="title">
     Manage your Sheets here!
   </h1>
-  <div class="sheet__override box">
-    <sheet sheet-type.bind="expSheetId"></sheet>
-  </div>
-  <div class="sheet__override box">
-    <sheet sheet-type.bind="revSheetId"></sheet>
+  <div>
+    <div class="box" repeat.for="resource of resourceList.items">
+      <sheet resource.bind="resource"></sheet>
+    </div>
   </div>
 </template>

@@ -1,10 +1,11 @@
 import { inject } from 'aurelia-framework';
 import { SheetService } from '../editor/sheet-service';
+import { ResourceList } from '../model/resource-list';
 
-@inject(SheetService)
+@inject(SheetService, ResourceList)
 export class Home {
-  constructor(sheetService) {
+  constructor(sheetService, resourceList) {
     this.ss = sheetService;
-    console.log(this.ss.resourceList);
+    console.log(resourceList);
   }
 }

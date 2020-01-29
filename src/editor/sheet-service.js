@@ -1,44 +1,44 @@
 import { inject, Factory } from 'aurelia-dependency-injection';
 import { Api } from '../backend/api';
-import { ResourceItem } from '../model/resource-item';
-import { ResourceList } from '../model/resource-list';
 import moment from 'moment';
-import { CONFIG } from './sheet-config';
 
-@inject(Factory.of(Api), Factory.of(ResourceList), Factory.of(ResourceItem))
+// Chooses on arguments, which api methods to be used!
+
+@inject(Factory.of(Api))
 export class SheetService {
-  constructor(ApiClass, ResourceListBuilder) {
+  constructor(ApiClass) {
     this.api = new ApiClass;
-    this.resourceList = new ResourceListBuilder;
-    this.CONFIG = CONFIG;
-
     this.mom = moment;
     console.log('sheet-service constructed.');
   }
 
-  readCategories(type, glaId) {
-    const catIdentifier = type + '/' + glaId;
-    return this.api.read(catIdentifier)
+  // NEW API METHODS
+  load(glaId) {
+    const glance = 'sheets/' + glaId;
+    return this.api.read(glance)
       .then((result) => {
         return result;
       })
       .catch((error) => console.log('failed'));
   }
 
-  readValues(type, catId) {
-    const valIdentifier = type + '/values/' + catId;
-    return this.api.read(valIdentifier)
+  loadValues(dto) {
+    const values = 'sheets/' + dto['gla_id'] + '/' + dto['type'] + '/' + dto['sheet_id'];
+    return this.api.read(values)
       .then((result) => {
         return result;
-      });
+      })
+      .catch((error) => console.log('failed'));
   }
 
-  updateValues(data) {
-    this.api.create(data.resType, data)
+  save(dto) {
+    this.api.update('sheets/' + dto['glaId'] + '/' + dto['type'], dto)
       .then((result) => {
         // LOGGER return
       });
   }
+
+  // OLD
 
   createCategory(data) {
     return this.api.create(data['type'] + '/new', data)
@@ -68,35 +68,6 @@ export class SheetService {
       'name': cat.name,
       'tax': cat.tax
     };
-  }
-
-  async buildResource(type, glaId) {
-    const hot = [];
-    try {
-      const categories = await this.readCategories(type, glaId);
-      // console.log(categories);
-      for (let category of categories) {
-        const values = await this.readValues(type, category['cat_id']);
-        const catObject = this.createCatObject(category);
-        values.forEach((value, index) => catObject['col' + index] = value.value);
-        hot.push(catObject);
-      }
-      return hot;
-    }
-    catch {
-      throw new Error('Resource Builder failed.');
-    }
-  }
-
-  async readResource(type) {
-    let resource = new ResourceItem();
-    // register function!
-    resource.resType = type;
-    resource.glaId = 4001;
-    resource.sheetData = CONFIG;
-    resource.sheetData.data = await this.buildResource(type, resource.glaId);
-    this.resourceList.register(resource);
-    return resource;
   }
 
   configTimePeriod() {
